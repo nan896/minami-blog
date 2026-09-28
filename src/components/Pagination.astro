@@ -1,0 +1,42 @@
+---
+import { localizePath, type Locale } from '../lib/i18n'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+  current: number
+  total: number
+  /** 逻辑路径生成器：给第 N 页，返回不含语言前缀的路径 */
+  pathFor: (page: number) => string
+}
+
+const { locale, current, total, pathFor } = Astro.props
+const dict = t(locale)
+
+const linkClass =
+  'rounded border border-line px-3 py-1.5 text-sm text-ink-soft transition-colors hover:border-accent hover:text-accent'
+---
+
+{
+  total > 1 && (
+    <nav class="mt-8 flex items-center justify-between gap-3" aria-label={dict.pageOf(current, total)}>
+      {current > 1 ? (
+        <a class={linkClass} href={localizePath(locale, pathFor(current - 1))} rel="prev">
+          ← {dict.previousPage}
+        </a>
+      ) : (
+        <span />
+      )}
+
+      <span class="text-xs text-muted">{dict.pageOf(current, total)}</span>
+
+      {current < total ? (
+        <a class={linkClass} href={localizePath(locale, pathFor(current + 1))} rel="next">
+          {dict.nextPage} →
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  )
+}

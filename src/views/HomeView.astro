@@ -1,0 +1,39 @@
+---
+import { siteConfig } from '../../site.config'
+import Pagination from '../components/Pagination.astro'
+import PostCard from '../components/PostCard.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import type { Locale } from '../lib/i18n'
+import type { Post } from '../lib/posts'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+  posts: Post[]
+  current: number
+  total: number
+  /** 逻辑路径生成器：给第 N 页返回不含语言前缀的路径 */
+  pathFor: (page: number) => string
+}
+
+const { locale, posts, current, total, pathFor } = Astro.props
+const dict = t(locale)
+---
+
+<BaseLayout locale={locale} path={pathFor(current)}>
+  <h1 class="sr-only">{siteConfig.name} · {siteConfig.tagline[locale]}</h1>
+
+  {
+    posts.length > 0 ? (
+      <div>
+        {posts.map((post) => (
+          <PostCard post={post} locale={locale} />
+        ))}
+      </div>
+    ) : (
+      <p class="text-sm text-muted">{dict.noPosts}</p>
+    )
+  }
+
+  <Pagination locale={locale} current={current} total={total} pathFor={pathFor} />
+</BaseLayout>

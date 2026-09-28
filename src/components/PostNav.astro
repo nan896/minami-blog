@@ -1,0 +1,46 @@
+---
+import { localizePath, type Locale } from '../lib/i18n'
+import { postUrl, type Post } from '../lib/posts'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+  /** 更新的那篇 */
+  newer?: Post
+  /** 更旧的那篇 */
+  older?: Post
+}
+
+const { locale, newer, older } = Astro.props
+const dict = t(locale)
+
+const cardClass =
+  'group flex flex-col gap-1 rounded-card border border-line bg-white/60 p-4 transition-colors hover:border-accent'
+---
+
+{
+  (newer || older) && (
+    <nav class="mt-10 border-t border-line pt-6" aria-label={dict.newerPost}>
+      <div class="grid gap-3 sm:grid-cols-2">
+        {newer && (
+          <a class={cardClass} href={localizePath(locale, postUrl(newer))}>
+            <span class="text-xs text-muted">
+              ← {dict.newerPost}
+            </span>
+            <span class="line-clamp-2 text-sm text-ink transition-colors group-hover:text-accent">
+              {newer.data.title}
+            </span>
+          </a>
+        )}
+        {older && (
+          <a class={`${cardClass} sm:col-start-2 sm:text-right`} href={localizePath(locale, postUrl(older))}>
+            <span class="text-xs text-muted">{dict.olderPost} →</span>
+            <span class="line-clamp-2 text-sm text-ink transition-colors group-hover:text-accent">
+              {older.data.title}
+            </span>
+          </a>
+        )}
+      </div>
+    </nav>
+  )
+}

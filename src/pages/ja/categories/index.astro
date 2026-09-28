@@ -1,0 +1,22 @@
+---
+import { collectCategories, getPosts } from '../../../lib/posts'
+import { t } from '../../../lib/ui'
+import TaxonomyView from '../../../views/TaxonomyView.astro'
+
+const dict = t('ja')
+const posts = await getPosts('ja')
+const items = collectCategories(posts, 'ja').map((category) => ({
+  name: category.name,
+  count: category.count,
+  url: category.url,
+}))
+---
+
+<TaxonomyView
+  locale="ja"
+  path="/categories/"
+  kicker={dict.categories}
+  title={dict.allCategories}
+  items={items}
+  emptyText={dict.noPosts}
+/>

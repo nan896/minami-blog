@@ -1,0 +1,66 @@
+---
+import { siteConfig } from '../../site.config'
+import { localizePath, type Locale } from '../lib/i18n'
+import { t } from '../lib/ui'
+
+import LanguageSwitch from './LanguageSwitch.astro'
+
+export interface Props {
+  locale: Locale
+  /** 当前页面的逻辑路径（不含语言前缀），用来判断导航高亮 */
+  path: string
+  /** 语言切换目标，由页面算好 */
+  targets: Record<Locale, string>
+}
+
+const { locale, path, targets } = Astro.props
+const dict = t(locale)
+
+function isActive(navPath: string): boolean {
+  return navPath === '/' ? path === '/' : path.startsWith(navPath)
+}
+---
+
+<header class="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur-sm">
+  <div class="mx-auto max-w-page px-5">
+    <div class="flex items-center gap-4 pt-4 pb-2">
+      <a href={localizePath(locale, '/')} class="group flex flex-wrap items-baseline gap-x-2">
+        <span class="font-serif text-2xl font-bold tracking-tight text-ink group-hover:text-accent">
+          {siteConfig.name}
+        </span>
+        <span class="text-xs text-muted">{siteConfig.tagline[locale]}</span>
+      </a>
+      <div class="ml-auto flex items-center gap-2">
+        <a
+          href={localizePath(locale, '/search/')}
+          class="rounded px-2 py-1 text-sm text-ink-soft transition-colors hover:bg-paper-soft hover:text-accent"
+        >
+          {dict.search}
+        </a>
+        <LanguageSwitch locale={locale} targets={targets} />
+      </div>
+    </div>
+
+    <nav
+      class="flex flex-wrap items-center gap-x-1 gap-y-1 border-t border-line/70 py-2 text-sm"
+      aria-label={dict.home}
+    >
+      {
+        siteConfig.nav.map((item) => (
+          <a
+            href={localizePath(locale, item.path)}
+            aria-current={isActive(item.path) ? 'page' : undefined}
+            class:list={[
+              'rounded px-2.5 py-1 transition-colors',
+              isActive(item.path)
+                ? 'bg-accent-soft font-medium text-accent'
+                : 'text-ink-soft hover:bg-paper-soft hover:text-accent',
+            ]}
+          >
+            {item.label[locale]}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

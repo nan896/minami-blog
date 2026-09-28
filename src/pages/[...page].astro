@@ -1,0 +1,22 @@
+---
+// 中文首页，也是分页路由：第 1 页在 /，第 2 页起在 /2/、/3/……
+import { siteConfig } from '../../site.config'
+import { getPosts, paginate } from '../lib/posts'
+import HomeView from '../views/HomeView.astro'
+
+export async function getStaticPaths() {
+  const posts = await getPosts('zh')
+  const pages = paginate(posts, siteConfig.postsPerPage)
+
+  return pages.map((pagePosts, index) => ({
+    params: { page: index === 0 ? undefined : String(index + 1) },
+    props: { posts: pagePosts, current: index + 1, total: pages.length },
+  }))
+}
+
+const { posts, current, total } = Astro.props
+
+const pathFor = (page: number) => (page === 1 ? '/' : `/${page}/`)
+---
+
+<HomeView locale="zh" posts={posts} current={current} total={total} pathFor={pathFor} />

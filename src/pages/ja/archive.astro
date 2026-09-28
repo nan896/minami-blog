@@ -1,0 +1,8 @@
+---
+import { getPosts } from '../../lib/posts'
+import ArchiveView from '../../views/ArchiveView.astro'
+
+const posts = await getPosts('ja')
+---
+
+<ArchiveView locale="ja" posts={posts} />

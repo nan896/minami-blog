@@ -1,0 +1,28 @@
+---
+import { localeMeta, locales, type Locale } from '../lib/i18n'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+  /** 每种语言该跳到哪儿。由页面算好：有对应页面就跳对应页面，没有就跳该语言首页 */
+  targets: Record<Locale, string>
+}
+
+const { locale, targets } = Astro.props
+const others = locales.filter((item) => item !== locale)
+const dict = t(locale)
+---
+
+<nav class="flex items-center gap-0.5 text-sm" aria-label={dict.languageSwitch}>
+  {
+    others.map((item) => (
+      <a
+        href={targets[item]}
+        hreflang={localeMeta(item).htmlLang}
+        class="rounded px-2 py-1 text-muted transition-colors hover:bg-paper-soft hover:text-accent"
+      >
+        {localeMeta(item).label}
+      </a>
+    ))
+  }
+</nav>

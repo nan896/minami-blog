@@ -1,0 +1,115 @@
+---
+import { render } from 'astro:content'
+
+import { siteConfig } from '../../site.config'
+import Comments from '../components/Comments.astro'
+import PostNav from '../components/PostNav.astro'
+import TableOfContents from '../components/TableOfContents.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {
+  categoryPath,
+  localizePath,
+  otherLocales,
+  tagPath,
+  type Locale,
+} from '../lib/i18n'
+import { formatDate, getAlternates, postPath, type Post } from '../lib/posts'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+  post: Post
+  newer?: Post
+  older?: Post
+}
+
+const { locale, post, newer, older } = Astro.props
+const dict = t(locale)
+
+const { Content, headings } = await render(post)
+const category = siteConfig.categories.find((item) => item.slug === post.data.category)
+
+// 有译文就指向译文；没有译文时，语言切换把访客送回该语言首页
+const translations = await getAlternates(post)
+const switcherFallback = Object.fromEntries(
+  otherLocales(locale)
+    .filter((item) => !translations[item])
+    .map((item) => [item, localizePath(item, '/')]),
+)
+---
+
+<BaseLayout
+  locale={locale}
+  path={postPath(post)}
+  title={post.data.title}
+  description={post.data.description}
+  alternates={translations}
+  switcherFallback={switcherFallback}
+  type="article"
+  publishedTime={post.data.date}
+>
+  <article>
+    <header class="border-b border-line pb-6" data-pagefind-body>
+      <h1 class="font-serif text-2xl leading-snug text-ink" data-pagefind-meta="title">
+        {post.data.title}
+      </h1>
+
+      <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+        <time datetime={post.data.date.toISOString()}>
+          {formatDate(post.data.date, locale)}
+        </time>
+        {
+          category && (
+            <>
+              <span aria-hidden="true">·</span>
+              <a
+                class="transition-colors hover:text-accent"
+                href={localizePath(locale, categoryPath(category.slug))}
+              >
+                {category.name[locale]}
+              </a>
+            </>
+          )
+        }
+        {post.data.draft && (
+          <span class="rounded bg-vermilion/10 px-1.5 py-0.5">{dict.draftBadge}</span>
+        )}
+      </div>
+
+      <p class="mt-3 text-sm text-ink-soft">{post.data.description}</p>
+
+      {
+        post.data.tags.length > 0 && (
+          <ul class="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted">
+            {post.data.tags.map((tag) => (
+              <li>
+                <a
+                  class="transition-colors hover:text-accent"
+                  href={localizePath(locale, tagPath(tag))}
+                >
+                  #{tag}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="mt-8 lg:hidden">
+      <TableOfContents headings={headings} title={dict.toc} />
+    </div>
+
+    <div class="mt-8">
+      <TableOfContents headings={headings} title={dict.toc} />
+    </div>
+
+    <div class="mt-8 article-body" data-pagefind-body>
+      <Content />
+    </div>
+  </article>
+
+  <PostNav locale={locale} newer={newer} older={older} />
+
+  <Comments locale={locale} />
+</BaseLayout>

@@ -1,0 +1,8 @@
+# pnpm 10 起，安装相关的设置从 package.json 的 "pnpm" 字段搬到了这个文件。
+#
+# allowBuilds：放行 esbuild 的构建脚本。
+# pnpm 默认会拦截依赖包的构建脚本，被拦截时 pnpm install 会以退出码 1 结束，
+# 从而让 CI 里的安装步骤失败。把 esbuild 显式放行即可。
+# （用 npm 或 yarn 安装时这个文件会被忽略，不影响使用。）
+allowBuilds:
+  esbuild: true

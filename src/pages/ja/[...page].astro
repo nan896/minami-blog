@@ -1,0 +1,22 @@
+---
+// 日文首页与分页：第 1 页在 /ja/，第 2 页起在 /ja/2/、/ja/3/……
+import { siteConfig } from '../../../site.config'
+import { getPosts, paginate } from '../../lib/posts'
+import HomeView from '../../views/HomeView.astro'
+
+export async function getStaticPaths() {
+  const posts = await getPosts('ja')
+  const pages = paginate(posts, siteConfig.postsPerPage)
+
+  return pages.map((pagePosts, index) => ({
+    params: { page: index === 0 ? undefined : String(index + 1) },
+    props: { posts: pagePosts, current: index + 1, total: pages.length },
+  }))
+}
+
+const { posts, current, total } = Astro.props
+
+const pathFor = (page: number) => (page === 1 ? '/' : `/${page}/`)
+---
+
+<HomeView locale="ja" posts={posts} current={current} total={total} pathFor={pathFor} />

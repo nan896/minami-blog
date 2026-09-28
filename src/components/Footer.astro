@@ -1,0 +1,42 @@
+---
+import { siteConfig } from '../../site.config'
+import { localizePath, type Locale } from '../lib/i18n'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const dict = t(locale)
+const year = new Date().getFullYear()
+---
+
+<footer class="mt-16 border-t border-line bg-paper-soft/70">
+  <div
+    class="mx-auto flex max-w-page flex-col gap-2 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center"
+  >
+    <p>© {year} {siteConfig.author} · MIT</p>
+    <div class="flex flex-wrap items-center gap-4 sm:ml-auto">
+      <a class="transition-colors hover:text-accent" href={localizePath(locale, '/rss.xml')}>
+        RSS
+      </a>
+      <span aria-hidden="true">·</span>
+      <span>Astro</span>
+      {
+        siteConfig.repoUrl && (
+          <>
+            <span aria-hidden="true">·</span>
+            <a
+              class="transition-colors hover:text-accent"
+              href={siteConfig.repoUrl}
+              rel="noopener"
+            >
+              {dict.sourceCode}
+            </a>
+          </>
+        )
+      }
+    </div>
+  </div>
+</footer>

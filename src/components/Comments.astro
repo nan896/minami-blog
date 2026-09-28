@@ -1,0 +1,49 @@
+---
+import { siteConfig } from '../../site.config'
+import type { Locale } from '../lib/i18n'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const dict = t(locale)
+
+const { enabled, repo, repoId, category, categoryId } = siteConfig.comments
+// 三项都填齐才算可用，避免只填一半时加载出空白框
+const ready = enabled && repo !== '' && repoId !== '' && categoryId !== ''
+---
+
+<section class="mt-12 border-t border-line pt-6">
+  <h2 class="font-serif text-lg font-bold text-ink">{dict.comments}</h2>
+
+  {
+    ready ? (
+      <>
+        <div class="mt-4" id="comments" />
+        {/* 只有在你把 comments.enabled 改成 true 并填好配置后，才会请求外部脚本 */}
+        <script
+          is:inline
+          src="https://giscus.app/client.js"
+          data-repo={repo}
+          data-repo-id={repoId}
+          data-category={category}
+          data-category-id={categoryId}
+          data-mapping="pathname"
+          data-strict="1"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="top"
+          data-theme="light"
+          data-lang={locale === 'ja' ? 'ja' : 'zh-CN'}
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async
+        />
+      </>
+    ) : (
+      <p class="mt-3 text-sm text-muted">{dict.commentsPending}</p>
+    )
+  }
+</section>

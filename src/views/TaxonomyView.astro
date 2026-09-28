@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { localizePath, type Locale } from '../lib/i18n'
+
+export interface Props {
+  locale: Locale
+  path: string
+  kicker: string
+  title: string
+  description?: string
+  /** url 是逻辑路径（不含语言前缀） */
+  items: { name: string; count: number; url: string }[]
+  emptyText: string
+}
+
+const { locale, path, kicker, title, description, items, emptyText } = Astro.props
+---
+
+<BaseLayout locale={locale} path={path} title={title} description={description}>
+  <header class="border-b border-line pb-5">
+    <p class="text-xs tracking-wide text-muted">{kicker}</p>
+    <h1 class="mt-1 font-serif text-2xl text-ink">{title}</h1>
+    {description && <p class="mt-2 text-sm text-ink-soft">{description}</p>}
+  </header>
+
+  {
+    items.length > 0 ? (
+      <ul class="mt-6 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <li>
+            <a
+              class="inline-flex items-baseline gap-2 rounded-card border border-line bg-white/60 px-3 py-2 text-sm text-ink-soft transition-colors hover:border-accent hover:text-accent"
+              href={localizePath(locale, item.url)}
+            >
+              <span>{item.name}</span>
+              <span class="text-xs text-muted">{item.count}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="mt-6 text-sm text-muted">{emptyText}</p>
+    )
+  }
+</BaseLayout>

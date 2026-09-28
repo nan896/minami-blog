@@ -1,0 +1,17 @@
+---
+import { getPosts, getSiblings } from '../../../lib/posts'
+import PostView from '../../../views/PostView.astro'
+
+export async function getStaticPaths() {
+  const posts = await getPosts('ja')
+
+  return posts.map((post) => ({
+    params: { slug: post.data.key },
+    props: { post, ...getSiblings(posts, post) },
+  }))
+}
+
+const { post, newer, older } = Astro.props
+---
+
+<PostView locale="ja" post={post} newer={newer} older={older} />

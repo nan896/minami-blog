@@ -1,0 +1,38 @@
+---
+import { siteConfig } from '../../../../site.config'
+import { categoryPath } from '../../../lib/i18n'
+import { collectCategories, getPosts } from '../../../lib/posts'
+import { t } from '../../../lib/ui'
+import ListPageView from '../../../views/ListPageView.astro'
+
+const locale = 'ja'
+
+export async function getStaticPaths() {
+  // getStaticPaths 会被提升出去执行，取不到 frontmatter 里的变量，所以这里重新声明一次
+  const locale = 'ja'
+  const posts = await getPosts(locale)
+  const categories = collectCategories(posts, locale)
+
+  return categories.map((category) => ({
+    params: { category: category.slug },
+    props: {
+      category,
+      posts: posts.filter((post) => post.data.category === category.slug),
+    },
+  }))
+}
+
+const { category, posts } = Astro.props
+const dict = t(locale)
+const meta = siteConfig.categories.find((item) => item.slug === category.slug)
+---
+
+<ListPageView
+  locale={locale}
+  path={categoryPath(category.slug)}
+  kicker={dict.categories}
+  title={category.name}
+  description={meta?.description[locale]}
+  posts={posts}
+  countText={dict.postsInCategory(posts.length)}
+/>

@@ -1,0 +1,42 @@
+---
+import { localizePath, tagPath } from '../../../lib/i18n'
+import { collectTags, getPosts } from '../../../lib/posts'
+import { t } from '../../../lib/ui'
+import ListPageView from '../../../views/ListPageView.astro'
+
+const locale = 'ja'
+const otherLocale = 'zh'
+
+export async function getStaticPaths() {
+  // getStaticPaths 会被提升出去执行，取不到 frontmatter 里的变量，所以这里重新声明一次
+  const locale = 'ja'
+  const posts = await getPosts(locale)
+
+  return collectTags(posts).map((tag) => ({
+    params: { tag: tag.term },
+    props: {
+      tag: tag.term,
+      posts: posts.filter((post) => post.data.tags.includes(tag.term)),
+    },
+  }))
+}
+
+const { tag, posts } = Astro.props
+const dict = t(locale)
+
+const otherTags = collectTags(await getPosts(otherLocale))
+const otherHasTag = otherTags.some((item) => item.term === tag)
+const alternates = otherHasTag ? { [otherLocale]: localizePath(otherLocale, tagPath(tag)) } : {}
+const switcherFallback = otherHasTag ? {} : { [otherLocale]: localizePath(otherLocale, '/tags/') }
+---
+
+<ListPageView
+  locale={locale}
+  path={tagPath(tag)}
+  kicker={dict.tags}
+  title={`#${tag}`}
+  posts={posts}
+  countText={dict.postsWithTag(posts.length)}
+  alternates={alternates}
+  switcherFallback={switcherFallback}
+/>

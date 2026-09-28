@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { localizePath, type Locale } from '../lib/i18n'
+import { formatMonthDay, groupByYear, postUrl, type Post } from '../lib/posts'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+  posts: Post[]
+}
+
+const { locale, posts } = Astro.props
+const dict = t(locale)
+const groups = groupByYear(posts)
+---
+
+<BaseLayout locale={locale} path="/archive/" title={dict.archive} description={dict.archive}>
+  <header class="border-b border-line pb-5">
+    <h1 class="font-serif text-2xl text-ink">{dict.archive}</h1>
+    <p class="mt-2 text-xs text-muted">{dict.totalPosts(posts.length)}</p>
+  </header>
+
+  {
+    groups.length > 0 ? (
+      <div class="mt-8 space-y-10">
+        {groups.map((group) => (
+          <section>
+            <h2 class="font-serif text-lg text-ink">
+              {dict.yearsAgo(group.year, group.posts.length)}
+            </h2>
+            <ul class="mt-3 border-t border-line/70">
+              {group.posts.map((post) => (
+                <li class="flex items-baseline gap-4 border-b border-line/70 py-2.5">
+                  <time class="w-20 shrink-0 text-xs text-muted" datetime={post.data.date.toISOString()}>
+                    {formatMonthDay(post.data.date, locale)}
+                  </time>
+                  <a
+                    class="text-sm text-ink-soft transition-colors hover:text-accent"
+                    href={localizePath(locale, postUrl(post))}
+                  >
+                    {post.data.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    ) : (
+      <p class="mt-6 text-sm text-muted">{dict.noPosts}</p>
+    )
+  }
+</BaseLayout>

@@ -1,0 +1,63 @@
+---
+import PostCard from '../components/PostCard.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import type { Locale } from '../lib/i18n'
+import type { Post } from '../lib/posts'
+import { t } from '../lib/ui'
+
+export interface Props {
+  locale: Locale
+  /** 该页面的逻辑路径 */
+  path: string
+  /** 标题上方的小字，例如「分类」「标签」 */
+  kicker: string
+  title: string
+  description?: string
+  posts: Post[]
+  countText: string
+  alternates?: Partial<Record<Locale, string>>
+  switcherFallback?: Partial<Record<Locale, string>>
+}
+
+const {
+  locale,
+  path,
+  kicker,
+  title,
+  description,
+  posts,
+  countText,
+  alternates = {},
+  switcherFallback = {},
+} = Astro.props
+
+const dict = t(locale)
+---
+
+<BaseLayout
+  locale={locale}
+  path={path}
+  title={title}
+  description={description}
+  alternates={alternates}
+  switcherFallback={switcherFallback}
+>
+  <header class="border-b border-line pb-5">
+    <p class="text-xs tracking-wide text-muted">{kicker}</p>
+    <h1 class="mt-1 font-serif text-2xl text-ink">{title}</h1>
+    {description && <p class="mt-2 text-sm text-ink-soft">{description}</p>}
+    <p class="mt-2 text-xs text-muted">{countText}</p>
+  </header>
+
+  {
+    posts.length > 0 ? (
+      <div class="mt-2">
+        {posts.map((post) => (
+          <PostCard post={post} locale={locale} />
+        ))}
+      </div>
+    ) : (
+      <p class="mt-6 text-sm text-muted">{dict.noPosts}</p>
+    )
+  }
+</BaseLayout>
